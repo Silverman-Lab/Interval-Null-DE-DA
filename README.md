@@ -19,7 +19,7 @@ For the CCRCC analysis, the following files must be downloaded and unzipped to e
 
 ## Notes on Analysis
 
-1. Under `project_code/output` the intermediate files can be found, thus re-analysis is not needed. However, here are details on how to recreate these files if needed:
+1. Under `project_code/output` the intermediate files can be found, thus re-analysis is not needed. However, here are details on how to recreate these files and make figures if needed:
    1. figure_2: First run `bash run_all.sh`, then run `Rscript make_plot_2.R`, then make the figure using the ipython notebook
    2. figure_3: First run `Rscript make_plot_3_data.R`, then make the figure using the ipython notebook
    3. figure_s2: First run `Rscript make_plot_S2_data.R`, then run `Rscript make_plot_S2.R`, then make the figure using the ipython notebook
