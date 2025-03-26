@@ -1,9 +1,10 @@
 
 ## Purpose
 
-This repo contains code and output files used in the publication "Replacing Normalizations
-with Interval Assumptions Improves the Rigor and Robustness of Differential Expression and
-Differential Abundance Analyses."
+This repo contains updated code for BMC Bioinformatics for the paper "Replacing Normalizations with Interval Assumptions Enhances Differential Expression and Differential
+Abundance Analyses"
+
+See prior release for code used for the preprint paper.
 
 ## Notes on Requirements
 

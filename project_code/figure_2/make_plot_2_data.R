@@ -22,9 +22,21 @@ benchmark_func <- function(n, iters, mc.samples, min_dep, max_dep, keep_taxa,
         data$Y <- Y
         data$X <- cbind(1, data$X[,1])
 
+        ## LinDA
+        linda_res <- run_linda(data)
+        linda_lfc <- linda_res$output$Treatment[,"log2FoldChange"]
+        linda_padj <- linda_res$output$Treatment[,"padj"]
+        ## ANCOM-BC
+        ancom_bc_res <- run_ancom_bc(data)
+        ancom_bc_padj <- ancom_bc_res$res$q_val[,"Treatment"]
+        ancom_bc_lfc <- ancom_bc_res$res$lfc[,"Treatment"]
         ## ILDEx2
-        indexa_1_res <- run_indexa(data, mc.samples, epsilon_l[1], epsilon_u[1], denom="none")
-        indexa_2_res <- run_indexa(data, mc.samples, epsilon_l[2], epsilon_u[2], denom="none")
+        indexa_1_res <- run_indexa(data, mc.samples, epsilon_l[1],
+                                   epsilon_u[1], denom="none")
+        indexa_2_res <- run_indexa(data, mc.samples, epsilon_l[2],
+                                   epsilon_u[2], denom="none")
+        indexa_3_res <- run_indexa(data, mc.samples, epsilon_l[3],
+                                   epsilon_u[3], denom="none")
         indexa_ctt1_pval <- indexa_1_res[,"ctt.pval"]
         indexa_ctt1_padj <- indexa_1_res[,"ctt.pval.BH.adj"]
         indexa_ctt1_lfc <- indexa_1_res[,"median.effect"]
@@ -37,6 +49,12 @@ benchmark_func <- function(n, iters, mc.samples, min_dep, max_dep, keep_taxa,
         indexa_gtt2_pval <- indexa_2_res[,"gtt.pval"]
         indexa_gtt2_padj <- indexa_2_res[,"gtt.pval.BH.adj"]
         indexa_gtt2_lfc <- indexa_2_res[,"median.effect"]
+        indexa_ctt3_pval <- indexa_3_res[,"ctt.pval"]
+        indexa_ctt3_padj <- indexa_3_res[,"ctt.pval.BH.adj"]
+        indexa_ctt3_lfc <- indexa_3_res[,"median.effect"]
+        indexa_gtt3_pval <- indexa_3_res[,"gtt.pval"]
+        indexa_gtt3_padj <- indexa_3_res[,"gtt.pval.BH.adj"]
+        indexa_gtt3_lfc <- indexa_3_res[,"median.effect"]
         ## DESeq2
         deseq2_res <- run_deseq2(data, "poscounts")
         deseq2_pval <- deseq2_res$pvalue
@@ -58,14 +76,18 @@ benchmark_func <- function(n, iters, mc.samples, min_dep, max_dep, keep_taxa,
         aldex2_padj <- aldex2_res[,"we.eBH"]
         aldex2_lfc <- aldex2_res[,"effect"]
         
-        res_padj <- cbind(deseq2_padj, limma_padj, edger_padj,
+        res_padj <- cbind(linda_padj, ancom_bc_padj, deseq2_padj,
+                          limma_padj, edger_padj,
                           aldex2_padj, indexa_ctt1_padj,
                           indexa_ctt2_padj, indexa_gtt1_padj,
-                          indexa_gtt2_padj)
-        res_lfcs <- cbind(deseq2_lfc, limma_lfc, edger_lfc,
+                          indexa_gtt2_padj, indexa_ctt3_padj,
+                          indexa_gtt3_padj)
+        res_lfcs <- cbind(linda_lfc, ancom_bc_lfc, deseq2_lfc,
+                          limma_lfc, edger_lfc,
                           aldex2_lfc, indexa_ctt1_lfc,
                           indexa_ctt2_lfc, indexa_gtt1_lfc,
-                          indexa_gtt2_lfc)
+                          indexa_gtt2_lfc, indexa_ctt3_lfc,
+                          indexa_gtt3_lfc)
         
         all_padj <- abind(all_padj, res_padj, along=3)
         all_lfcs <- abind(all_lfcs, res_lfcs, along=3)
@@ -104,7 +126,7 @@ iters <- as.numeric(args[1])
 n <- as.numeric(args[2])
 res_l <- benchmark_func(n, iters, 300, 20000, 200000, keep_taxa,
                         subset_species, lfcs, prevalences,
-                        epsilon_l=c(0,0), epsilon_u=c(0.5,1.75))
+                        epsilon_l=c(0, 0, 1), epsilon_u=c(0.5, 1.75, 1.75))
 
 saveRDS(res_l, paste0("../output/sparse_dossa_out_", iters,
                       "_", n, "_", p.method, ".RDS"))

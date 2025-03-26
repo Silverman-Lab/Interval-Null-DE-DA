@@ -8,6 +8,9 @@ library(latex2exp)
 library(lemon)
 library(abind)
 library(INDExA)
+library(MicrobiomeStat)
+library(ANCOMBC)
+library(phyloseq)
 
 sim_dossa2 <- function(n, template, seq_depths, subset_features=NULL,
                        lfcs=NULL, prevalences=NULL) {
@@ -170,3 +173,25 @@ run_indexa <- function(data, mc.samples, epsilon_l, epsilon_u,
     return(new_res)
 }
 
+run_linda <- function(data, n.cores=4) {
+  df <- data.frame(data$X)
+  colnames(df) <- c("Intercept", "Treatment")
+  fit.linda <- linda(data$Y, df, "~Treatment",
+                     feature.dat.type="count",
+                     zero.handling="imputation",
+                     n.cores=n.cores)
+  return(fit.linda)
+}
+
+run_ancom_bc <- function(data) {
+  otu_table <- otu_table(data$Y, taxa_are_rows=TRUE)
+  df <- data.frame(data$X)
+  colnames(df) <- c("Intercept", "Treatment")
+  row.names(df) <- colnames(data$Y)
+  samples <- sample_data(df)
+  phyloseq_obj <- phyloseq(otu_table, NULL, samples)
+  out = ancombc(phyloseq_obj,
+                formula="Treatment",
+                p_adj_method="BH")
+  return(out)
+}
